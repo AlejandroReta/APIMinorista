@@ -60,8 +60,7 @@ public class ProductoController {
     @PostMapping("/webhook/payment-confirmed")
     public ResponseEntity<String> receiveWebhook(@RequestBody WebhookPayload payload) {
         try {
-            logger.info("Recibiendo webhook: " + payload);
-            // Llamar al servicio para procesar la orden
+            logger.info("Payload recibido: {}", payload);
             productoService.processWebhook(payload);
             return ResponseEntity.ok("Notificación de pago recibida y procesada exitosamente.");
         } catch (Exception e) {
