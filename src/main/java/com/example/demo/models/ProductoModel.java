@@ -22,12 +22,12 @@ public class ProductoModel {
 
  @Column(name = "precio_compra")
  private double precioCompra;
+ @Column(name = "precio_venta", nullable = true)
+ private double precioVenta = 0.0;
 
  public double getPrecioVenta() {return precioVenta;}
 
  public void setPrecioVenta(double precioVenta) {this.precioVenta = precioVenta;}
-
- private double precioVenta = 0.0;
 
  public Long getIdProducto() {
   return idProducto;
