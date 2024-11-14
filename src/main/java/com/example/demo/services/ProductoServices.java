@@ -44,13 +44,14 @@ import java.util.Optional;
                     productoExistente.setStock(productoExistente.getStock() + product.getQuantity());
                     productoRepository.save(productoExistente);
                 } else {
-                    // Si el producto no existe, crea uno nuevo con información básica
+                    //Si el producto no existe, crea uno nuevo con información básica
                     ProductoModel nuevoProducto = new ProductoModel();
                     nuevoProducto.setSku(product.getSku());
                     nuevoProducto.setNombre("Nombre por definir");
                     nuevoProducto.setDescripcion("Descripción por definir");
                     nuevoProducto.setCategoria("Categoría por definir");
                     nuevoProducto.setStock(product.getQuantity());
+                    nuevoProducto.setPrecioVenta(0.0);  // Establece un valor predeterminado para precioVenta
                     productoRepository.save(nuevoProducto);
                 }
             }
