@@ -36,13 +36,23 @@ import java.util.Optional;
             }
 
             for (WebhookPayload.ProductDetails product : payload.getProducts()) {
-                // Buscar producto por SKU en lugar de ID
-                ProductoModel existingProduct = productoRepository.findBySku(product.getSku())
-                        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+                // Buscar producto por SKU
+                Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(product.getSku());
 
-                // Actualizar inventario sumando la cantidad
-                existingProduct.setStock(existingProduct.getStock() + product.getQuantity());
-                productoRepository.save(existingProduct);
+                if (productoExistenteOpt.isPresent()) {
+                    ProductoModel productoExistente = productoExistenteOpt.get();
+                    productoExistente.setStock(productoExistente.getStock() + product.getQuantity());
+                    productoRepository.save(productoExistente);
+                } else {
+                    // Si el producto no existe, crea uno nuevo con información básica
+                    ProductoModel nuevoProducto = new ProductoModel();
+                    nuevoProducto.setSku(product.getSku());
+                    nuevoProducto.setNombre("Nombre por definir");
+                    nuevoProducto.setDescripcion("Descripción por definir");
+                    nuevoProducto.setCategoria("Categoría por definir");
+                    nuevoProducto.setStock(product.getQuantity());
+                    productoRepository.save(nuevoProducto);
+                }
             }
         }
     }
