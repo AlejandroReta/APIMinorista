@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -19,15 +20,16 @@ public class ProductoController {
     private ProductoServices productoService;
 
     @Autowired
-    private ProductoRepository productoRepository; // Inyección del repositorio
+    private ProductoRepository productoRepository;
 
     @PostMapping("/comprar")
     public ResponseEntity<?> comprarProductos(@RequestBody List<ProductoCompra> productosComprados) {
         for (ProductoCompra productoCompra : productosComprados) {
-            // Busca el producto por SKU
-            ProductoModel productoExistente = productoRepository.findBySku(productoCompra.getSku());
+            // Busca el producto por SKU utilizando Optional
+            Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(productoCompra.getSku());
 
-            if (productoExistente != null) {
+            if (productoExistenteOpt.isPresent()) {
+                ProductoModel productoExistente = productoExistenteOpt.get();
                 // Si el producto existe, suma la cantidad comprada al stock existente
                 int nuevoStock = productoExistente.getStock() + productoCompra.getCantidad();
                 productoExistente.setStock(nuevoStock); // Actualiza el stock
@@ -49,6 +51,7 @@ public class ProductoController {
         // Si todo sale bien, devuelve un mensaje de éxito
         return ResponseEntity.ok("Compra procesada con éxito.");
     }
+
     @PostMapping("/webhook/payment-confirmed")
     public ResponseEntity<String> receiveWebhook(@RequestBody WebhookPayload payload) {
         try {
@@ -59,5 +62,4 @@ public class ProductoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la notificación.");
         }
     }
-
 }
