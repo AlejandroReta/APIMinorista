@@ -29,26 +29,31 @@ public class ProductoController {
     @PostMapping("/comprar")
     public ResponseEntity<?> comprarProductos(@RequestBody List<ProductoCompra> productosComprados) {
         for (ProductoCompra productoCompra : productosComprados) {
-            // Busca el producto por SKU utilizando Optional
-            Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(productoCompra.getSku());
+            try {
+                // Busca el producto por SKU utilizando Optional
+                Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(productoCompra.getSku());
 
-            if (productoExistenteOpt.isPresent()) {
-                ProductoModel productoExistente = productoExistenteOpt.get();
-                // Si el producto existe, suma la cantidad comprada al stock existente
-                int nuevoStock = productoExistente.getStock() + productoCompra.getCantidad();
-                productoExistente.setStock(nuevoStock); // Actualiza el stock
-                productoRepository.save(productoExistente); // Guarda los cambios en la base de datos
-            } else {
-                // Si el producto no existe, crea uno nuevo
-                ProductoModel nuevoProducto = new ProductoModel();
-                nuevoProducto.setSku(productoCompra.getSku());
-                nuevoProducto.setNombre("Nombre por definir"); // Se puede actualizar con los datos reales
-                nuevoProducto.setDescripcion("Descripción por definir");
-                nuevoProducto.setCategoria("Categoría por definir");
-                nuevoProducto.setStock(productoCompra.getCantidad());
-                nuevoProducto.setPrecioCompra(productoCompra.getPrecioUnitario()); // Establece el precio unitario recibido
+                if (productoExistenteOpt.isPresent()) {
+                    ProductoModel productoExistente = productoExistenteOpt.get();
+                    // Si el producto existe, suma la cantidad comprada al stock existente
+                    int nuevoStock = productoExistente.getStock() + productoCompra.getCantidad();
+                    productoExistente.setStock(nuevoStock); // Actualiza el stock
+                    productoRepository.save(productoExistente); // Guarda los cambios en la base de datos
+                } else {
+                    // Si el producto no existe, crea uno nuevo
+                    ProductoModel nuevoProducto = new ProductoModel();
+                    nuevoProducto.setSku(productoCompra.getSku());
+                    nuevoProducto.setNombre(productoCompra.getNombre()); // Se actualiza con el nombre real del payload
+                    nuevoProducto.setDescripcion("Producto añadido automáticamente");
+                    nuevoProducto.setCategoria("General");
+                    nuevoProducto.setStock(productoCompra.getCantidad());
+                    nuevoProducto.setPrecioCompra(productoCompra.getPrecioUnitario()); // Establece el precio unitario recibido
 
-                productoRepository.save(nuevoProducto); // Guarda el nuevo producto en la base de datos
+                    productoRepository.save(nuevoProducto); // Guarda el nuevo producto en la base de datos
+                }
+            } catch (Exception e) {
+                logger.error("Error al procesar producto con SKU: {}", productoCompra.getSku(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error procesando productos.");
             }
         }
 
@@ -56,16 +61,36 @@ public class ProductoController {
         return ResponseEntity.ok("Compra procesada con éxito.");
     }
 
-
     @PostMapping("/webhook/payment-confirmed")
     public ResponseEntity<String> receiveWebhook(@RequestBody WebhookPayload payload) {
-        try {
-            logger.info("Payload recibido: {}", payload);
-            productoService.processWebhook(payload);
-            return ResponseEntity.ok("Notificación de pago recibida y procesada exitosamente.");
-        } catch (Exception e) {
-            logger.error("Error al procesar la notificación", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la notificación.");
-        }
+            try {
+                logger.info("Payload recibido: {}", payload);
+
+                // Validar que el payload contiene los datos necesarios
+                if (payload.getProducts() == null || payload.getProducts().isEmpty()) {
+                    logger.warn("El payload no contiene productos.");
+                    return ResponseEntity.badRequest().body("El payload no contiene productos.");
+                }
+
+                // Convertir la lista de ProductDetails a ProductoCompra
+                List<ProductoCompra> productosComprados = payload.getProducts().stream()
+                        .map(product -> {
+                            ProductoCompra productoCompra = new ProductoCompra();
+                            productoCompra.setSku(product.getSku());
+                            productoCompra.setCantidad(product.getQuantity());
+                            productoCompra.setPrecioUnitario(product.getPrice());
+                            productoCompra.setNombre(product.getName());
+                            return productoCompra;
+                        })
+                        .toList();
+
+                // Procesar los productos usando el método existente
+                comprarProductos(productosComprados);
+
+                return ResponseEntity.ok("Notificación de pago recibida y procesada exitosamente.");
+            } catch (Exception e) {
+                logger.error("Error al procesar la notificación", e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la notificación.");
+            }
     }
 }

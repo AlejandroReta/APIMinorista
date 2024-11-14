@@ -7,6 +7,7 @@ public class WebhookPayload {
     private List<ProductDetails> products;
     private String timestamp;
 
+    // Getters y Setters
     public Long getOrderId() {
         return orderId;
     }
@@ -39,10 +40,14 @@ public class WebhookPayload {
         this.timestamp = timestamp;
     }
 
+    // Clase interna para los detalles de los productos
     public static class ProductDetails {
-        private String sku;
-        private int quantity;
+        private String sku; // Identificador único del producto
+        private int quantity; // Cantidad comprada
+        private String name; // Nombre del producto (opcional)
+        private double price; // Precio unitario del producto (opcional)
 
+        // Getters y Setters
         public String getSku() {
             return sku;
         }
@@ -57,6 +62,22 @@ public class WebhookPayload {
 
         public void setQuantity(int quantity) {
             this.quantity = quantity;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
         }
     }
 }

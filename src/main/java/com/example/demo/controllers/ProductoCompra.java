@@ -1,19 +1,12 @@
 package com.example.demo.controllers;
 
 public class ProductoCompra {
-    private String sku;   // El código del producto
-    private int cantidad;// Cuántos quieres comprar
+    private String sku;
+    private int cantidad;
     private double precioUnitario;
-    // Getters y setters
+    private String nombre; // Asegúrate de tener este atributo
 
-    public double getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
+    // Getters y Setters
     public String getSku() {
         return sku;
     }
@@ -29,4 +22,21 @@ public class ProductoCompra {
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
     }
+
+    public double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(double precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
+
+    public String getNombre() { // Getter para nombre
+        return nombre;
+    }
+
+    public void setNombre(String nombre) { // Setter para nombre
+        this.nombre = nombre;
+    }
 }
+
