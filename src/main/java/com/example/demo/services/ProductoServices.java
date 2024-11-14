@@ -1,4 +1,5 @@
 package com.example.demo.services;
+import com.example.demo.controllers.ProductoCompra;
 import com.example.demo.models.ProductoModel;
 import com.example.demo.models.WebhookPayload;
 import com.example.demo.repositories.ProductoRepository;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -16,6 +18,27 @@ import java.util.Optional;
         @Autowired
         private ProductoRepository productoRepository;
 
+    public void comprarProductos(List<ProductoCompra> productosComprados) {
+        for (ProductoCompra productoCompra : productosComprados) {
+            // Buscar producto existente por SKU
+            Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(productoCompra.getSku());
+
+            if (productoExistenteOpt.isPresent()) {
+                ProductoModel productoExistente = productoExistenteOpt.get();
+                // Actualizar stock del producto existente
+                productoExistente.setStock(productoExistente.getStock() + productoCompra.getCantidad());
+                productoRepository.save(productoExistente);
+            } else {
+                // Crear un nuevo producto si no existe
+                ProductoModel nuevoProducto = new ProductoModel();
+                nuevoProducto.setSku(productoCompra.getSku());
+                nuevoProducto.setNombre(productoCompra.getNombre());
+                nuevoProducto.setStock(productoCompra.getCantidad());
+                nuevoProducto.setPrecioCompra(productoCompra.getPrecioUnitario());
+                productoRepository.save(nuevoProducto);
+            }
+        }
+    }
         public ProductoModel guardarOActualizarProducto(ProductoModel nuevoProducto) {
             Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(nuevoProducto.getSku());
 

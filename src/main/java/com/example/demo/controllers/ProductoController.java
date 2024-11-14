@@ -63,34 +63,33 @@ public class ProductoController {
 
     @PostMapping("/webhook/payment-confirmed")
     public ResponseEntity<String> receiveWebhook(@RequestBody WebhookPayload payload) {
-            try {
-                logger.info("Payload recibido: {}", payload);
+        try {
+            logger.info("Payload recibido: {}", payload);
 
-                // Validar que el payload contiene los datos necesarios
-                if (payload.getProducts() == null || payload.getProducts().isEmpty()) {
-                    logger.warn("El payload no contiene productos.");
-                    return ResponseEntity.badRequest().body("El payload no contiene productos.");
-                }
-
-                // Convertir la lista de ProductDetails a ProductoCompra
-                List<ProductoCompra> productosComprados = payload.getProducts().stream()
-                        .map(product -> {
-                            ProductoCompra productoCompra = new ProductoCompra();
-                            productoCompra.setSku(product.getSku());
-                            productoCompra.setCantidad(product.getQuantity());
-                            productoCompra.setPrecioUnitario(product.getPrice());
-                            productoCompra.setNombre(product.getName());
-                            return productoCompra;
-                        })
-                        .toList();
-
-                // Procesar los productos usando el método existente
-                comprarProductos(productosComprados);
-
-                return ResponseEntity.ok("Notificación de pago recibida y procesada exitosamente.");
-            } catch (Exception e) {
-                logger.error("Error al procesar la notificación", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la notificación.");
+            if (payload.getProducts() == null || payload.getProducts().isEmpty()) {
+                logger.warn("El payload no contiene productos.");
+                return ResponseEntity.badRequest().body("El payload no contiene productos.");
             }
+
+            // Convertir la lista de ProductDetails a ProductoCompra
+            List<ProductoCompra> productosComprados = payload.getProducts().stream()
+                    .map(product -> {
+                        ProductoCompra productoCompra = new ProductoCompra();
+                        productoCompra.setSku(product.getSku());
+                        productoCompra.setCantidad(product.getQuantity());
+                        productoCompra.setPrecioUnitario(product.getPrice());
+                        productoCompra.setNombre(product.getName());
+                        return productoCompra;
+                    })
+                    .toList();
+
+            // Llamar al servicio para procesar los productos
+            productoService.comprarProductos(productosComprados);
+
+            return ResponseEntity.ok("Notificación de pago recibida y procesada exitosamente.");
+        } catch (Exception e) {
+            logger.error("Error al procesar la notificación", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la notificación.");
+        }
     }
 }
