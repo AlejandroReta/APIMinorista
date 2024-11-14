@@ -20,21 +20,24 @@ import java.util.Optional;
 
     public void comprarProductos(List<ProductoCompra> productosComprados) {
         for (ProductoCompra productoCompra : productosComprados) {
-            // Buscar producto existente por SKU
             Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(productoCompra.getSku());
 
             if (productoExistenteOpt.isPresent()) {
                 ProductoModel productoExistente = productoExistenteOpt.get();
-                // Actualizar stock del producto existente
                 productoExistente.setStock(productoExistente.getStock() + productoCompra.getCantidad());
                 productoRepository.save(productoExistente);
             } else {
-                // Crear un nuevo producto si no existe
                 ProductoModel nuevoProducto = new ProductoModel();
                 nuevoProducto.setSku(productoCompra.getSku());
                 nuevoProducto.setNombre(productoCompra.getNombre());
+                nuevoProducto.setDescripcion("Descripción por definir");
+                nuevoProducto.setCategoria("Categoría por definir");
                 nuevoProducto.setStock(productoCompra.getCantidad());
                 nuevoProducto.setPrecioCompra(productoCompra.getPrecioUnitario());
+                nuevoProducto.setPrecioVenta(0.0); // Asignar precio de venta por defecto o ajustarlo
+                nuevoProducto.setIdProveedor(1L); // Establecer un proveedor predeterminado si es necesario
+                nuevoProducto.setCantidad(productoCompra.getCantidad());
+
                 productoRepository.save(nuevoProducto);
             }
         }

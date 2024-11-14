@@ -3,46 +3,39 @@ package com.example.demo.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="productos")
+@Table(name = "productos")
 public class ProductoModel {
+
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  @Column(name = "id_producto")
  private Long idProducto;
 
- @Column(name = "sku", unique = true, nullable = false)
- private String sku;
-
  private String nombre;
  private String descripcion;
  private String categoria;
- private int Cantidad;
-
  private int stock;
 
  @Column(name = "precio_compra")
  private double precioCompra;
 
- private double precioVenta = 0.0;
+ @Column(name = "precio_venta")
+ private double precioVenta;
 
- public double getPrecioVenta() {return precioVenta;}
+ @Column(name = "id_proveedor")
+ private Long idProveedor;
 
- public void setPrecioVenta(double precioVenta) {this.precioVenta = precioVenta;}
+ private int cantidad;
 
+ private String sku;
+
+ // Getters y Setters
  public Long getIdProducto() {
   return idProducto;
  }
 
  public void setIdProducto(Long idProducto) {
   this.idProducto = idProducto;
- }
-
- public String getSku() {
-  return sku;
- }
-
- public void setSku(String sku) {
-  this.sku = sku;
  }
 
  public String getNombre() {
@@ -85,11 +78,36 @@ public class ProductoModel {
   this.precioCompra = precioCompra;
  }
 
+ public double getPrecioVenta() {
+  return precioVenta;
+ }
+
+ public void setPrecioVenta(double precioVenta) {
+  this.precioVenta = precioVenta;
+ }
+
+ public Long getIdProveedor() {
+  return idProveedor;
+ }
+
+ public void setIdProveedor(Long idProveedor) {
+  this.idProveedor = idProveedor;
+ }
+
  public int getCantidad() {
-  return Cantidad;
+  return cantidad;
  }
 
  public void setCantidad(int cantidad) {
-  Cantidad = cantidad;
+  this.cantidad = cantidad;
+ }
+
+ public String getSku() {
+  return sku;
+ }
+
+ public void setSku(String sku) {
+  this.sku = sku;
  }
 }
+
