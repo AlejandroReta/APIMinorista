@@ -40,15 +40,15 @@ public class WebhookPayload {
     }
 
     public static class ProductDetails {
-        private Long productId;
+        private String sku;
         private int quantity;
 
-        public Long getProductId() {
-            return productId;
+        public String getSku() {
+            return sku;
         }
 
-        public void setProductId(Long productId) {
-            this.productId = productId;
+        public void setSku(String sku) {
+            this.sku = sku;
         }
 
         public int getQuantity() {

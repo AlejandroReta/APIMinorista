@@ -7,40 +7,42 @@ import org.springframework.stereotype.Service;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Optional;
 
 
-    @Service
+@Service
     public class ProductoServices {
 
         @Autowired
         private ProductoRepository productoRepository;
 
         public ProductoModel guardarOActualizarProducto(ProductoModel nuevoProducto) {
-            ProductoModel productoExistente = productoRepository.findBySku(nuevoProducto.getSku());
+            Optional<ProductoModel> productoExistenteOpt = productoRepository.findBySku(nuevoProducto.getSku());
 
-            if (productoExistente != null) {
-                // Actualiza el producto existente
+            if (productoExistenteOpt.isPresent()) {
+                ProductoModel productoExistente = productoExistenteOpt.get();
                 productoExistente.setNombre(nuevoProducto.getNombre());
                 productoExistente.setPrecioCompra(nuevoProducto.getPrecioCompra());
-                productoExistente.setCantidad(nuevoProducto.getCantidad());
+                productoExistente.setStock(nuevoProducto.getStock());
                 return productoRepository.save(productoExistente);
             } else {
-                // Guarda el nuevo producto
                 return productoRepository.save(nuevoProducto);
             }
         }
+
         public void processWebhook(WebhookPayload payload) {
             if (!"paid".equals(payload.getStatus())) {
                 throw new IllegalArgumentException("Estado de pago no válido");
             }
 
             for (WebhookPayload.ProductDetails product : payload.getProducts()) {
-                ProductoModel existingProduct = productoRepository.findById(product.getProductId())
+                // Buscar producto por SKU en lugar de ID
+                ProductoModel existingProduct = productoRepository.findBySku(product.getSku())
                         .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
-                // Actualiza el inventario (suma la cantidad)
+                // Actualizar inventario sumando la cantidad
                 existingProduct.setStock(existingProduct.getStock() + product.getQuantity());
                 productoRepository.save(existingProduct);
             }
         }
-}
+    }
