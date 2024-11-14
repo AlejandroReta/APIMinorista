@@ -1,9 +1,0 @@
-com\example\demo\controllers\ProductoController.class
-com\example\demo\DemoApplication.class
-com\example\demo\services\ProductoServices.class
-com\example\demo\models\ProductoModel.class
-com\example\demo\models\WebhookPayload.class
-com\example\demo\repositories\ProductoRepository.class
-com\example\demo\controllers\ProductoCompra.class
-com\example\demo\models\WebhookPayload$ProductDetails.class
-com\example\demo\ServletInitializer.class
